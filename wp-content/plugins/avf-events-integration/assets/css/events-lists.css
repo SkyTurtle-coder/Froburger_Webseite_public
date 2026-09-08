@@ -986,6 +986,43 @@
 	margin-top: 18px;
 }
 
+.avf-event-detail__edit {
+	margin-top: 1.5rem;
+}
+
+.avf-event-detail__edit summary {
+	cursor: pointer;
+	font-weight: 600;
+	padding: 0.75rem 0;
+}
+
+.avf-event-detail__edit fieldset {
+	display: grid;
+	gap: 1rem;
+	border: 0;
+	padding: 0;
+	margin: 0;
+	min-width: 0;
+}
+
+.avf-event-detail__edit legend {
+	margin-bottom: 1rem;
+	font-weight: 600;
+}
+
+.avf-event-detail__edit [data-avf-edit-close] {
+	min-height: 44px;
+	border: 1px solid currentColor;
+	border-radius: 24px;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+}
+
+.avf-event-detail__edit fieldset[hidden] {
+	display: none;
+}
+
 .avf-event-detail__form-note {
 	margin: 0;
 	font-size: var(--fs-xs);
@@ -1010,6 +1047,7 @@
 }
 
 .avf-event-detail__field input[type="text"],
+.avf-event-detail__field input[type="password"],
 .avf-event-detail__field select,
 .avf-event-detail__field textarea {
 	width: 100%;

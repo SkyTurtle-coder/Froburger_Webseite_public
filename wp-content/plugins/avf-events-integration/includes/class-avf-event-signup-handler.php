@@ -40,6 +40,43 @@ class AVF_Event_Signup_Handler {
 	private function __construct() {
 		add_action( 'admin_post_' . self::ACTION, array( $this, 'handle' ) );
 		add_action( 'admin_post_nopriv_' . self::ACTION, array( $this, 'handle' ) );
+		add_action( 'wp_ajax_avf_event_edit', array( $this, 'handle_edit' ) );
+		add_action( 'wp_ajax_nopriv_avf_event_edit', array( $this, 'handle_edit' ) );
+	}
+
+	/** PIN-protected reads and updates bypass all page and transient caches. */
+	public function handle_edit() {
+		nocache_headers();
+		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+			wp_send_json_error( array( 'message' => 'Ungültige Anfrage.' ), 405 );
+		}
+		check_ajax_referer( self::NONCE_ACTION, '_avf_event_signup_nonce' );
+		$slug = isset( $_POST['event_slug'] ) && is_string( $_POST['event_slug'] ) ? sanitize_title( wp_unslash( $_POST['event_slug'] ) ) : '';
+		$operation = isset( $_POST['operation'] ) && is_string( $_POST['operation'] ) ? wp_unslash( $_POST['operation'] ) : '';
+		if ( ! in_array( $operation, array( 'read', 'update' ), true ) ) {
+			wp_send_json_error( array( 'message' => 'Ungültige Anfrage.' ), 400 );
+		}
+		$client = new AVF_Events_API_Client();
+		$event = $client->get_event_detail( $slug );
+		if ( is_wp_error( $event ) ) {
+			wp_send_json_error( array( 'message' => $this->map_event_error_message( $event ) ), 400 );
+		}
+		$payload = 'update' === $operation ? $this->build_payload( $event ) : array(
+			'vulgo' => isset( $_POST['vulgo'] ) && is_string( $_POST['vulgo'] ) ? sanitize_text_field( wp_unslash( $_POST['vulgo'] ) ) : '',
+			'pin' => isset( $_POST['pin'] ) && is_string( $_POST['pin'] ) ? wp_unslash( $_POST['pin'] ) : '',
+		);
+		if ( is_wp_error( $payload ) ) {
+			wp_send_json_error( array( 'message' => $payload->get_error_message() ), 400 );
+		}
+		$payload['operation'] = $operation;
+		$response = $client->submit_event_signup( $slug, $payload );
+		if ( is_wp_error( $response ) ) {
+			wp_send_json_error( array( 'message' => $this->map_signup_error_message( $response ) ), 400 );
+		}
+		if ( 'update' === $operation ) {
+			AVF_Events_API_Client::clear_cache();
+		}
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -172,6 +209,10 @@ class AVF_Event_Signup_Handler {
 	 * @return array|WP_Error
 	 */
 	private function build_payload( array $event ) {
+		$pin = isset( $_POST['pin'] ) && is_string( $_POST['pin'] ) ? wp_unslash( $_POST['pin'] ) : '';
+		if ( ! preg_match( '/\A[0-9]{4,6}\z/', $pin ) ) {
+			return new WP_Error( 'invalid_pin', __( 'Der PIN muss aus 4 bis 6 Ziffern bestehen.', 'avf-events-integration' ) );
+		}
 		$website   = isset( $_POST['website'] ) ? trim( (string) wp_unslash( $_POST['website'] ) ) : '';
 		$vulgo_raw = isset( $_POST['vulgo'] ) ? wp_unslash( $_POST['vulgo'] ) : '';
 		$vulgo     = trim( preg_replace( '/\s+/', ' ', sanitize_text_field( $vulgo_raw ) ) );
@@ -249,6 +290,7 @@ class AVF_Event_Signup_Handler {
 		}
 
 		return array(
+			'pin'       => $pin,
 			'vulgo'     => $vulgo,
 			'attending' => $attending,
 			'website'   => '',
@@ -317,6 +359,10 @@ class AVF_Event_Signup_Handler {
 		$api_code = ( is_array( $data ) && ! empty( $data['api_code'] ) ) ? (string) $data['api_code'] : '';
 
 		switch ( $api_code ) {
+			case 'invalid_pin':
+			case 'invalid_credentials':
+			case 'pin_locked':
+				return $error->get_error_message();
 			case 'event_not_found':
 				return __( 'Dieser Anlass wurde nicht gefunden.', 'avf-events-integration' );
 			case 'signup_disabled':

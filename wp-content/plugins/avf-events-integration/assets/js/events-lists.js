@@ -358,6 +358,9 @@
 		if ( field.disabled || ! field.hasAttribute( 'required' ) ) {
 			return toggleFieldError( field, '' );
 		}
+		if ( field.name === 'pin' && ! /^[0-9]{4,6}$/.test( field.value ) ) {
+			return toggleFieldError( field, 'Der PIN muss aus 4 bis 6 Ziffern bestehen.' );
+		}
 
 		if ( 'checkbox' === type ) {
 			if ( ! field.checked ) {
@@ -455,6 +458,89 @@
 		}
 	}
 
+	function initSignupEditing( root ) {
+		var form = root.querySelector( '[data-avf-edit-form]' );
+		if ( ! form ) { return; }
+		var fields = form.querySelector( '[data-avf-edit-fields]' );
+		var message = form.querySelector( '[data-avf-edit-message]' );
+		var submit = form.querySelector( '[type="submit"]' );
+		var close = form.querySelector( '[data-avf-edit-close]' );
+		var vulgo = form.elements.namedItem( 'vulgo' );
+		var pin = form.elements.namedItem( 'pin' );
+		var editing = false;
+		var busy = false;
+		function reset() {
+			form.reset();
+			pin.value = '';
+			vulgo.readOnly = false;
+			pin.readOnly = false;
+			fields.hidden = true;
+			fields.disabled = true;
+			close.hidden = true;
+			editing = false;
+			submit.textContent = 'Anmeldung öffnen';
+		}
+		close.addEventListener( 'click', function () { reset(); message.textContent = ''; } );
+		window.addEventListener( 'pagehide', reset );
+		form.addEventListener( 'submit', async function ( event ) {
+			event.preventDefault();
+			if ( busy || ! form.reportValidity() ) { return; }
+			busy = true;
+			submit.disabled = true;
+			close.disabled = true;
+			var saving = editing;
+			var data = new FormData( form );
+			data.set( 'operation', saving ? 'update' : 'read' );
+			message.textContent = saving ? 'Änderungen werden gespeichert …' : 'Anmeldung wird geöffnet …';
+			try {
+				var response = await fetch( form.getAttribute( 'action' ), { method: 'POST', body: data, credentials: 'same-origin', cache: 'no-store' } );
+				var result = await response.json();
+				if ( ! result.success ) {
+					throw new Error( result.data && result.data.message ? result.data.message : 'Bitte lade die Seite neu und versuche es erneut.' );
+				}
+				if ( saving ) {
+					var signup = result.data.signup;
+					// Update the public row without putting private values into the page cache.
+					root.querySelectorAll( '.avf-event-detail__table tbody tr' ).forEach( function ( row ) {
+						if ( row.cells[0].textContent.trim() !== signup.vulgo ) { return; }
+						row.cells[1].textContent = signup.attending ? 'Ja' : 'Nein';
+						row.querySelectorAll( '[data-signup-column]' ).forEach( function ( cell ) {
+							var value = signup.values[cell.dataset.signupColumn];
+							cell.textContent = typeof value === 'boolean' ? ( value ? 'Ja' : 'Nein' ) : ( value || '–' );
+						} );
+					} );
+					reset();
+					message.textContent = 'Deine Änderungen wurden gespeichert.';
+				} else {
+					var values = result.data.signup;
+					vulgo.value = values.vulgo;
+					vulgo.readOnly = true;
+					pin.readOnly = true;
+					fields.hidden = false;
+					fields.disabled = false;
+					form.elements.namedItem( 'attending' ).value = values.attending ? '1' : '0';
+					Object.keys( values.values ).forEach( function ( key ) {
+						var input = form.elements.namedItem( 'values[' + key + ']' );
+						if ( ! input ) { return; }
+						if ( input.type === 'checkbox' ) { input.checked = !! values.values[key]; }
+						else { input.value = values.values[key] == null ? '' : values.values[key]; }
+					} );
+					editing = true;
+					close.hidden = false;
+					submit.textContent = 'Änderungen speichern';
+					message.textContent = 'Du kannst deine Angaben jetzt ändern.';
+					form.elements.namedItem( 'attending' ).focus();
+				}
+			} catch ( error ) {
+				message.textContent = error.message || 'Die Anfrage ist fehlgeschlagen. Bitte versuche es erneut.';
+			} finally {
+				busy = false;
+				submit.disabled = false;
+				close.disabled = false;
+			}
+		} );
+	}
+
 	function initEventDetail() {
 		var root = document.querySelector( '.avf-event-detail' );
 
@@ -465,6 +551,7 @@
 		demoteHeroHeading( root );
 		focusNotice( root );
 		initEventForm( root );
+		initSignupEditing( root );
 		initStickyCta( root );
 	}
 

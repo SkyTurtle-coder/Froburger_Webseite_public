@@ -239,6 +239,7 @@ class AVF_Event_Detail_Shortcode {
 						<?php
 						if ( $event['signup_enabled'] && $event['signup_open'] ) {
 							echo $this->render_signup_form( $event, $form_values ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $this->render_edit_form( $event ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						} else {
 							echo wp_kses_post( '<p class="avf-event-detail__form-closed">' . esc_html__( 'Für diesen Anlass ist derzeit keine öffentliche Anmeldung möglich.', 'avf-events-integration' ) . '</p>' );
 						}
@@ -296,7 +297,7 @@ class AVF_Event_Detail_Shortcode {
 							<td><?php echo esc_html( $signup['vulgo'] ); ?></td>
 							<td><?php echo esc_html( $signup['attending'] ? __( 'Ja', 'avf-events-integration' ) : __( 'Nein', 'avf-events-integration' ) ); ?></td>
 							<?php foreach ( $public_columns as $column ) : ?>
-								<td><?php echo esc_html( $this->format_public_value( $signup['values'], $column ) ); ?></td>
+								<td data-signup-column="<?php echo esc_attr( $column['key'] ); ?>"><?php echo esc_html( $this->format_public_value( $signup['values'], $column ) ); ?></td>
 							<?php endforeach; ?>
 						</tr>
 					<?php endforeach; ?>
@@ -314,6 +315,44 @@ class AVF_Event_Detail_Shortcode {
 	 * @param array $form_values Previously submitted values.
 	 * @return string
 	 */
+	private function render_edit_form( array $event ) {
+		ob_start();
+		?>
+		<details class="avf-event-detail__edit">
+			<summary>Bestehende Anmeldung bearbeiten</summary>
+			<noscript><p>Bitte aktiviere JavaScript zum Bearbeiten oder kontaktiere den Admin.</p></noscript>
+			<form class="avf-event-detail__form" action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" method="post" data-avf-edit-form>
+				<input type="hidden" name="action" value="avf_event_edit" />
+				<input type="hidden" name="event_slug" value="<?php echo esc_attr( $event['slug'] ); ?>" />
+				<input type="hidden" name="_avf_event_signup_nonce" value="<?php echo esc_attr( wp_create_nonce( AVF_Event_Signup_Handler::NONCE_ACTION ) ); ?>" />
+				<div class="avf-event-detail__field">
+					<label for="avf-edit-vulgo">Vulgo *</label>
+					<input id="avf-edit-vulgo" type="text" name="vulgo" maxlength="80" required autocomplete="nickname" />
+				</div>
+				<div class="avf-event-detail__field">
+					<label for="avf-edit-pin">PIN *</label>
+					<input id="avf-edit-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,6}" minlength="4" maxlength="6" required autocomplete="current-password" aria-describedby="avf-edit-pin-help" />
+					<p id="avf-edit-pin-help">PIN vergessen oder noch keinen PIN? Bitte kontaktiere den Admin.</p>
+				</div>
+				<fieldset data-avf-edit-fields hidden disabled>
+					<legend>Deine Angaben</legend>
+					<div class="avf-event-detail__field">
+						<label for="avf-edit-attending">Anwesend *</label>
+						<select id="avf-edit-attending" name="attending" required><option value="1">Ja</option><option value="0">Nein</option></select>
+					</div>
+					<?php foreach ( $event['signup_columns'] as $column ) : ?>
+						<?php echo str_replace( 'avf-event-field', 'avf-edit-field', $this->render_dynamic_field( $column, array() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php endforeach; ?>
+				</fieldset>
+				<p data-avf-edit-message role="status" aria-live="polite"></p>
+				<button class="avf-event-detail__submit" type="submit">Anmeldung öffnen</button>
+				<button type="button" data-avf-edit-close hidden>Bearbeitung beenden</button>
+			</form>
+		</details>
+		<?php
+		return ob_get_clean();
+	}
+
 	private function render_signup_form( array $event, array $form_values ) {
 		ob_start();
 		?>
@@ -350,6 +389,12 @@ class AVF_Event_Detail_Shortcode {
 				<?php echo $this->render_dynamic_field( $column, $form_values ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php endforeach; ?>
 
+			<div class="avf-event-detail__field">
+				<label for="avf-event-pin">PIN zum späteren Bearbeiten *</label>
+				<input id="avf-event-pin" type="password" name="pin" inputmode="numeric" pattern="[0-9]{4,6}" minlength="4" maxlength="6" required autocomplete="new-password" aria-describedby="avf-event-pin-help avf-event-pin-error" />
+				<p class="avf-event-detail__field-error" id="avf-event-pin-error" role="alert" hidden></p>
+				<p id="avf-event-pin-help">4 bis 6 Ziffern. Bitte merken. PIN vergessen? Bitte kontaktiere den Admin.</p>
+			</div>
 			<button class="avf-event-detail__submit" type="submit"><?php esc_html_e( 'Anmeldung senden', 'avf-events-integration' ); ?></button>
 		</form>
 		<?php

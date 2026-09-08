@@ -490,6 +490,8 @@
 			close.disabled = true;
 			var saving = editing;
 			var data = new FormData( form );
+			vulgo.readOnly = true;
+			pin.readOnly = true;
 			data.set( 'operation', saving ? 'update' : 'read' );
 			message.textContent = saving ? 'Änderungen werden gespeichert …' : 'Anmeldung wird geöffnet …';
 			try {
@@ -537,6 +539,8 @@
 				busy = false;
 				submit.disabled = false;
 				close.disabled = false;
+				vulgo.readOnly = editing;
+				pin.readOnly = editing;
 			}
 		} );
 	}

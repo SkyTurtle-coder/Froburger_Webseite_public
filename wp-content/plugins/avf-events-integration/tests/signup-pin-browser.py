@@ -29,6 +29,7 @@ with sync_playwright() as p:
         errors = []
         calls = []
         page.on("pageerror", lambda error: errors.append(str(error)))
+        pending = []
 
         def route_request(route):
             if route.request.url == "http://pin.test/":
@@ -41,6 +42,9 @@ with sync_playwright() as p:
                     route.fulfill(status=400, json={"success": False, "data": {"message": "Vulgo oder PIN ungültig."}})
                 else:
                     saving = '\r\nupdate\r\n' in body
+                    if not saving:
+                        pending.append(route)
+                        return
                     route.fulfill(json={"success": True, "data": {"signup": {
                         "vulgo": "Newton", "attending": not saving,
                         "values": {"menu": "Fleisch" if saving else "Vegi", "note": "Privat", "bus": not saving}
@@ -66,6 +70,14 @@ with sync_playwright() as p:
         expect(form.locator("fieldset")).to_be_hidden()
         form.locator("[name=pin]").fill("01234")
         form.locator("[type=submit]").click()
+        expect(form.locator("[name=pin]")).to_have_attribute("readonly", "")
+        expect(form.locator("[name=vulgo]")).to_have_attribute("readonly", "")
+        page.wait_for_timeout(100)
+        assert len(pending) == 1
+        pending.pop().fulfill(json={"success": True, "data": {"signup": {
+            "vulgo": "Newton", "attending": True,
+            "values": {"menu": "Vegi", "note": "Privat", "bus": True}
+        }}})
         expect(form.locator("fieldset")).to_be_visible()
         expect(form.locator('[name="values[menu]"]')).to_have_value("Vegi")
         expect(form.locator('[name="values[note]"]')).to_have_value("Privat")

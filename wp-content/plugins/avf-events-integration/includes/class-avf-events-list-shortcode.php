@@ -327,8 +327,8 @@ class AVF_Events_List_Shortcode {
 					<?php
 					printf(
 						/* translators: 1: time (H:i), 2: location name */
-						esc_html__( '%1$s Uhr · %2$s', 'avf-events-integration' ),
-						esc_html( $view['time_part'] ),
+						esc_html__( '%1$s · %2$s', 'avf-events-integration' ),
+						esc_html( $view['time_label'] ),
 						esc_html( $view['location_name'] )
 					);
 					?>

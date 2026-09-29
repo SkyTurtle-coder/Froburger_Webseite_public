@@ -14,6 +14,13 @@ defined( 'ABSPATH' ) || exit;
 
 class AVF_Events_View_Helpers {
 
+	/** Returns only an explicitly supplied, supported time suffix. */
+	public static function timing_suffix( array $event ) {
+		$labels = array( 'st' => ' s.t.', 'ct' => ' c.t.' );
+		$timing = isset( $event['start_timing'] ) && is_string( $event['start_timing'] ) ? $event['start_timing'] : '';
+		return isset( $labels[ $timing ] ) ? $labels[ $timing ] : '';
+	}
+
 	/**
 	 * Returns the configured public events page path.
 	 *
@@ -132,6 +139,7 @@ class AVF_Events_View_Helpers {
 			'date_part'         => $date_part,
 			'short_date_part'   => $short_date,
 			'time_part'         => $time_part,
+			'time_label'        => $time_part . ' Uhr' . self::timing_suffix( $event ),
 			'end_date_part'     => $end_date_part,
 			'is_multi_day'      => $is_multi_day,
 			'datetime_attr'     => $event['start_at'],

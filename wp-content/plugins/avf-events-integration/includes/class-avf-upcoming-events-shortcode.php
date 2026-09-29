@@ -133,9 +133,9 @@ class AVF_Upcoming_Events_Shortcode {
 
 		$meta = sprintf(
 			/* translators: 1: date (d.m.Y), 2: time (H:i), 3: location name */
-			__( '%1$s · %2$s Uhr · %3$s', 'avf-events-integration' ),
+			__( '%1$s · %2$s · %3$s', 'avf-events-integration' ),
 			$date_part,
-			$time_part,
+			$time_part . ' Uhr' . AVF_Events_View_Helpers::timing_suffix( $event ),
 			$event['location_name']
 		);
 

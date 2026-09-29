@@ -545,6 +545,10 @@ class AVF_Event_Detail_Shortcode {
 	 * @return string
 	 */
 	private function format_time_range( array $event ) {
+		$suffix = AVF_Events_View_Helpers::timing_suffix( $event );
+		if ( '' !== $suffix ) {
+			return $event['start_time'] . ' Uhr' . $suffix . ( '' !== $event['end_time'] ? ' - ' . $event['end_time'] . ' Uhr' : '' );
+		}
 		if ( '' !== $event['end_time'] ) {
 			return $event['start_time'] . ' - ' . $event['end_time'] . ' Uhr';
 		}

@@ -624,6 +624,7 @@ class AVF_Events_API_Client {
 			'status'            => ( isset( $item['status'] ) && is_scalar( $item['status'] ) ) ? sanitize_key( (string) $item['status'] ) : '',
 			'status_label'      => ( isset( $item['status_label'] ) && is_scalar( $item['status_label'] ) ) ? sanitize_text_field( (string) $item['status_label'] ) : '',
 			'start_at'          => (string) $item['start_at'],
+			'start_timing'      => isset( $item['start_timing'] ) && in_array( $item['start_timing'], array( 'st', 'ct' ), true ) ? $item['start_timing'] : '',
 			'end_at'            => (string) $item['end_at'],
 			'timezone_name'     => (string) $item['timezone_name'],
 			'location_name'     => (string) $item['location_name'],

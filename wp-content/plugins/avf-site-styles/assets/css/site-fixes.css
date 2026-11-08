@@ -324,6 +324,63 @@ body.home .avf-hero-lead p {
 }
 
 /*
+ * Fix: the Impressum content is rendered as one horizontal flex row.
+ *
+ * The staging page's page-specific Elementor stylesheets are requested from
+ * the production uploads host, where files for staging post ID 1792 do not
+ * exist (404). Without those generated rules, both content containers fall
+ * back to Elementor's row direction and every text/heading widget becomes a
+ * narrow column. Mirror the working Datenschutz container rules here in the
+ * versioned site stylesheet, which is available on both hosts.
+ *
+ * Scope this fallback to the Impressum element IDs instead of the numeric
+ * WordPress page ID so the rule remains isolated but is not coupled to the
+ * current staging database ID.
+ */
+.elementor[data-elementor-type="wp-page"] > .elementor-element-3ddca20 {
+	width: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
+}
+
+.elementor[data-elementor-type="wp-page"] > .elementor-element-3ddca20 > .elementor-element-2fa15ef {
+	width: 100% !important;
+	max-width: 1200px !important;
+	flex-direction: column !important;
+}
+
+/*
+ * Datenschutz (page ID 46): the generated Elementor post stylesheet can be
+ * unavailable on the public site. In that case Elementor falls back to a
+ * horizontal flex container and squeezes every text widget into a column.
+ * Keep this fallback deliberately scoped to this page and its two containers.
+ */
+body.page-id-46 .elementor-46 > .elementor-element-4d5d867,
+.elementor[data-elementor-type="wp-page"][data-elementor-id="46"] > .elementor-element-4d5d867 {
+	width: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
+	align-items: stretch !important;
+}
+
+body.page-id-46 .elementor-46 > .elementor-element-4d5d867 > .elementor-element-11a252c,
+.elementor[data-elementor-type="wp-page"][data-elementor-id="46"] > .elementor-element-4d5d867 > .elementor-element-11a252c {
+	width: min(100% - 48px, 1200px) !important;
+	max-width: 1200px !important;
+	margin-inline: auto !important;
+	display: flex !important;
+	flex: 0 1 auto !important;
+	flex-direction: column !important;
+	align-items: stretch !important;
+}
+
+body.page-id-46 .elementor-46 > .elementor-element-4d5d867 > .elementor-element-11a252c > .elementor-element,
+.elementor[data-elementor-type="wp-page"][data-elementor-id="46"] > .elementor-element-4d5d867 > .elementor-element-11a252c > .elementor-element {
+	width: 100% !important;
+	max-width: 100% !important;
+}
+
+/*
  * Hard fallback for the live "Ueber uns" page/template pair.
  *
  * `post-355.css` styles the page-head template and `post-22.css` styles the
@@ -376,12 +433,12 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
  * padding defaults. Normalise them onto one 1200px axis without relying
  * on Elementor IDs.
  */
-.avf-has-zirkel-bg > .e-con:has(> .avf-events-page__inner),
-.avf-has-zirkel-bg > .e-con:has(> .elementor-widget-shortcode .avf-events-upcoming),
-.avf-has-zirkel-bg > .e-con:has(> .elementor-widget-shortcode .avf-events-calendar-actions),
-.avf-regional-staemme__inner,
-.avf-events-past-section,
-.avf-events-past-section + .elementor-element:has(.avf-events-past) {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .avf-events-page__inner),
+.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .elementor-widget-shortcode .avf-events-upcoming),
+.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .elementor-widget-shortcode .avf-events-calendar-actions),
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__inner,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section + .elementor-element:has(.avf-events-past) {
 	width: min(100% - 48px, 1200px) !important;
 	max-width: none !important;
 	margin-inline: auto !important;
@@ -394,7 +451,7 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
  * column's own 24px side margins shift this block farther left than the
  * other sections.
  */
-.avf-has-zirkel-bg > .e-con:has(> .avf-events-page__inner) {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .avf-events-page__inner) {
 	display: grid !important;
 	grid-template-columns: minmax(0, 42%) minmax(0, 50%);
 	justify-content: space-between;
@@ -403,7 +460,7 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	padding: 0 !important;
 }
 
-.avf-events-page__inner {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-page__inner {
 	display: flex !important;
 	flex-direction: column !important;
 	align-items: flex-start !important;
@@ -414,13 +471,13 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	padding: 0 !important;
 }
 
-.avf-events-page__inner > .elementor-widget,
-.avf-has-zirkel-bg > .e-con:has(> .avf-events-page__inner) > .e-con:not(.avf-events-page__inner) > .elementor-widget {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-page__inner > .elementor-widget,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .avf-events-page__inner) > .e-con:not(.avf-events-page__inner) > .elementor-widget {
 	width: 100%;
 	margin: 0 !important;
 }
 
-.avf-has-zirkel-bg > .e-con:has(> .avf-events-page__inner) > .e-con:not(.avf-events-page__inner) {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .avf-events-page__inner) > .e-con:not(.avf-events-page__inner) {
 	width: 100%;
 	min-width: 0;
 	max-width: 520px;
@@ -428,7 +485,7 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	padding: 0 !important;
 }
 
-.avf-has-zirkel-bg > .e-con:has(> .avf-events-page__inner) > .e-con:not(.avf-events-page__inner) p {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .avf-events-page__inner) > .e-con:not(.avf-events-page__inner) p {
 	margin: 0;
 }
 
@@ -473,11 +530,11 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	box-sizing: border-box;
 }
 
-.avf-regional-staemme__inner {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__inner {
 	padding: 0 20px !important;
 }
 
-.avf-regional-staemme__heading {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__heading {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -518,7 +575,7 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	color: var(--avf-text-muted, #657067);
 }
 
-.avf-regional-staemme__grid {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid {
 	display: grid !important;
 	grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 	gap: 36px !important;
@@ -568,10 +625,10 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	transform: translateY(-5px);
 }
 
-.avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child,
-.avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child,
-.avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child,
-.avf-regional-stamm-card__header {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__header {
 	display: grid !important;
 	grid-template-columns: minmax(0, 1fr) 94px !important;
 	align-items: start !important;
@@ -579,6 +636,11 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	width: 100%;
 	margin-bottom: 0;
 	padding: 34px 34px 30px !important;
+	background:
+		linear-gradient(135deg, var(--avf-green-dark, #183f1e) 0%, var(--avf-green, #245c2b) 100%) !important;
+}
+
+.avf-layout-elementor .avf-regional-stamm-card__header {
 	background:
 		linear-gradient(135deg, var(--avf-green-dark, #183f1e) 0%, var(--avf-green, #245c2b) 100%) !important;
 }
@@ -601,10 +663,10 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	color: var(--avf-white, #ffffff) !important;
 }
 
-.avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child > :last-child,
-.avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child > :last-child,
-.avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child > :last-child,
-.avf-regional-stamm-card__crest {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child > :last-child,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child > :last-child,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child > :last-child,
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__crest {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -821,9 +883,9 @@ body.page-id-22 .elementor-22 .elementor-element-28c9c4e p {
 	word-break: break-word;
 }
 
-body.elementor-editor-active .avf-regional-staemme__grid > .avf-regional-stamm-card,
-body.elementor-editor-active .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card,
-body.elementor-editor-active .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] {
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-card,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] {
 	min-height: auto !important;
 	background: #ffffff !important;
 	border: 1px solid rgba(24, 63, 30, 0.12) !important;
@@ -833,33 +895,33 @@ body.elementor-editor-active .avf-regional-staemme__grid > [class*="avf-regional
 	transform: none !important;
 }
 
-body.elementor-editor-active .avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child,
-body.elementor-editor-active .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child,
-body.elementor-editor-active .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child,
-body.elementor-editor-active .avf-regional-stamm-card__header {
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__header {
 	grid-template-columns: minmax(0, 1fr) 64px !important;
 	padding: 20px 20px 16px !important;
 	background: #f5f7f4 !important;
 }
 
-body.elementor-editor-active .avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child .elementor-heading-title,
-body.elementor-editor-active .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child .elementor-heading-title,
-body.elementor-editor-active .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child .elementor-heading-title {
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child .elementor-heading-title,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child .elementor-heading-title,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child .elementor-heading-title {
 	color: var(--avf-green-dark, #183f1e) !important;
 }
 
-body.elementor-editor-active .avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child > :last-child,
-body.elementor-editor-active .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child > :last-child,
-body.elementor-editor-active .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child > :last-child,
-body.elementor-editor-active .avf-regional-stamm-card__crest {
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-card > :first-child > :last-child,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > .avf-regional-stamm-cardavf-regional-stamm-card > :first-child > :last-child,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid > [class*="avf-regional-stamm-card"] > :first-child > :last-child,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__crest {
 	width: 64px;
 	height: 72px;
 	padding: 0 !important;
 }
 
-body.elementor-editor-active .avf-regional-stamm-card__details,
-body.elementor-editor-active .avf-regional-stamm-card__contact,
-body.elementor-editor-active .avf-regional-stamm-card__entry {
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__details,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__contact,
+body.elementor-editor-active .avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__entry {
 	padding: 20px !important;
 }
 
@@ -882,7 +944,7 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
  * These rules bridge that live structure without relying on Elementor IDs
  * or generated page CSS.
  */
-.avf-events-past-section {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section {
 	position: relative;
 	z-index: 1;
 	margin: 96px 0 0;
@@ -896,7 +958,7 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 	box-sizing: border-box;
 }
 
-.avf-events-past-section__inner {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section__inner {
 	display: grid !important;
 	grid-template-columns: minmax(0, 42%) minmax(0, 50%);
 	justify-content: space-between;
@@ -910,7 +972,7 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 	background: transparent;
 }
 
-.avf-events-past-section__heading {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section__heading {
 	display: flex !important;
 	flex-direction: column !important;
 	align-items: flex-start !important;
@@ -959,7 +1021,7 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 	margin: 0;
 }
 
-.avf-events-past-section + .elementor-element:has(.avf-events-past) {
+.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section + .elementor-element:has(.avf-events-past) {
 	margin-top: 40px;
 	margin-bottom: 88px;
 	padding: 0;
@@ -993,16 +1055,16 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 }
 
 @media (max-width: 1024px) {
-	.avf-has-zirkel-bg > .e-con:has(> .avf-events-page__inner),
-	.avf-has-zirkel-bg > .e-con:has(> .elementor-widget-shortcode .avf-events-upcoming),
-	.avf-has-zirkel-bg > .e-con:has(> .elementor-widget-shortcode .avf-events-calendar-actions),
-	.avf-regional-staemme__inner,
-	.avf-events-past-section,
-	.avf-events-past-section + .elementor-element:has(.avf-events-past) {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .avf-events-page__inner),
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .elementor-widget-shortcode .avf-events-upcoming),
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .elementor-widget-shortcode .avf-events-calendar-actions),
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__inner,
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section,
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section + .elementor-element:has(.avf-events-past) {
 		width: min(100% - 40px, 1200px) !important;
 	}
 
-	.avf-has-zirkel-bg > .e-con:has(> .avf-events-page__inner) {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .avf-events-page__inner) {
 		grid-template-columns: minmax(0, 1fr);
 		row-gap: 20px;
 	}
@@ -1016,11 +1078,11 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 		padding: 64px 0;
 	}
 
-	.avf-regional-staemme__inner {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__inner {
 		padding: 0 !important;
 	}
 
-	.avf-regional-staemme__grid {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 	}
 
@@ -1032,11 +1094,11 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 		justify-self: center;
 	}
 
-	.avf-events-past-section {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section {
 		margin-top: 92px;
 	}
 
-	.avf-events-past-section__inner {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section__inner {
 		grid-template-columns: minmax(0, 1fr);
 		row-gap: 20px;
 	}
@@ -1048,12 +1110,12 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 }
 
 @media (max-width: 767px) {
-	.avf-has-zirkel-bg > .e-con:has(> .avf-events-page__inner),
-	.avf-has-zirkel-bg > .e-con:has(> .elementor-widget-shortcode .avf-events-upcoming),
-	.avf-has-zirkel-bg > .e-con:has(> .elementor-widget-shortcode .avf-events-calendar-actions),
-	.avf-regional-staemme__inner,
-	.avf-events-past-section,
-	.avf-events-past-section + .elementor-element:has(.avf-events-past) {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .avf-events-page__inner),
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .elementor-widget-shortcode .avf-events-upcoming),
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) > .e-con:has(> .elementor-widget-shortcode .avf-events-calendar-actions),
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__inner,
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section,
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section + .elementor-element:has(.avf-events-past) {
 		width: min(100% - 32px, 1200px) !important;
 	}
 
@@ -1061,12 +1123,12 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 		padding: 52px 0;
 	}
 
-	.avf-regional-staemme__heading {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__heading {
 		gap: 14px;
 		margin-bottom: 32px;
 	}
 
-	.avf-regional-staemme__grid {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-staemme__grid {
 		grid-template-columns: minmax(0, 1fr) !important;
 		gap: 22px !important;
 	}
@@ -1085,13 +1147,13 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 		padding: 0 !important;
 	}
 
-	.avf-regional-stamm-card__header {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__header {
 		grid-template-columns: minmax(0, 1fr) 64px !important;
 		gap: 14px;
 		padding: 24px 22px 22px !important;
 	}
 
-	.avf-regional-stamm-card__crest {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-regional-stamm-card__crest {
 		width: 64px;
 		height: 72px;
 	}
@@ -1126,11 +1188,11 @@ body.elementor-editor-active .avf-regional-stamm-card__entry {
 		transform: none;
 	}
 
-	.avf-events-past-section {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section {
 		margin-top: 88px;
 	}
 
-	.avf-events-past-section + .elementor-element:has(.avf-events-past) {
+	.avf-has-zirkel-bg:not(.avf-layout-elementor) .avf-events-past-section + .elementor-element:has(.avf-events-past) {
 		margin-top: 32px;
 		margin-bottom: 80px;
 	}

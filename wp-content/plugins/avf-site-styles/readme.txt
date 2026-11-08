@@ -4,7 +4,7 @@ Tags: elementor, layout, bugfix
 Requires at least: 6.3
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.9
+Stable tag: 1.3.1
 License: GPLv2 or later
 
 Enthaelt gezielte projektspezifische Layoutkorrekturen.
@@ -114,6 +114,17 @@ wiederverwendbaren Klassen und das responsive Kartenlayout.
   automatisch mittig ueber beide Spalten gezogen.
 
 == Changelog ==
+
+= 1.3.1 =
+* Auf `test.avfroburger.ch` erzeugte Stylesheet-URLs werden auf den Testhost
+  zurueckgefuehrt. Die Testdatenbank meldet derzeit die Produktiv-URL, wodurch
+  Elementors CSS fuer testseitenspezifische Post-IDs zuvor irrtuemlich auf
+  `www.avfroburger.ch` angefordert wurde und dort mit HTTP 404 scheiterte.
+* Den Inhaltscontainer der Impressumsseite analog zur Datenschutzseite auf
+  volle Breite, maximal 1200px und vertikale Flex-Ausrichtung stabilisiert.
+  Der dateibasierte Fallback greift auch dann, wenn die seitenspezifischen
+  Elementor-CSS-Dateien der Testseiten-ID auf dem Produktiv-Uploads-Host
+  fehlen.
 
 = 1.2.9 =
 * Abschnitt "Geschichte" auf der Seite "Ueber uns" lokal auf stabile

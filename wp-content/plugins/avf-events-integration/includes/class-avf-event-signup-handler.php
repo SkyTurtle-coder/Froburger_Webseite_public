@@ -463,7 +463,11 @@ class AVF_Event_Signup_Handler {
 		}
 
 		if ( is_int( $value ) ) {
-			return (bool) $value;
+			if ( 0 === $value || 1 === $value ) {
+				return (bool) $value;
+			}
+
+			return null;
 		}
 
 		return null;

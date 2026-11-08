@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       AV Froburger Site Styles
  * Description:       Enthält gezielte projektspezifische Layoutkorrekturen.
- * Version:            1.3.0
+ * Version:            1.3.1
  * Requires at least:  6.3
  * Requires PHP:       7.4
  * Author:             AV Froburger
@@ -12,9 +12,41 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AVF_SITE_STYLES_VERSION', '1.3.0' );
+define( 'AVF_SITE_STYLES_VERSION', '1.3.1' );
 define( 'AVF_SITE_STYLES_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AVF_SITE_STYLES_URL', plugin_dir_url( __FILE__ ) );
+
+/**
+ * Loads WordPress/Elementor styles from the staging host on staging requests.
+ *
+ * The staging database currently exposes the production home/site URL. As a
+ * result, Elementor emits generated CSS URLs below www.avfroburger.ch even for
+ * test-only post IDs. Those files exist in the staging uploads directory but
+ * return 404 on production. Keep this narrowly scoped to stylesheet loader
+ * URLs and the known staging hostname so production remains untouched.
+ *
+ * @param string $src Stylesheet URL.
+ * @return string
+ */
+function avf_site_styles_use_staging_host_for_styles( $src ) {
+	if ( ! is_string( $src ) || '' === $src || empty( $_SERVER['HTTP_HOST'] ) ) {
+		return $src;
+	}
+
+	$request_host = strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) );
+	$request_host = preg_replace( '/:\d+$/', '', $request_host );
+
+	if ( 'test.avfroburger.ch' !== $request_host ) {
+		return $src;
+	}
+
+	return str_replace(
+		array( 'https://www.avfroburger.ch/', 'http://www.avfroburger.ch/' ),
+		'https://test.avfroburger.ch/',
+		$src
+	);
+}
+add_filter( 'style_loader_src', 'avf_site_styles_use_staging_host_for_styles', PHP_INT_MAX );
 
 /**
  * Returns whether the current request is a backend/editor/programmatic path
@@ -342,9 +374,9 @@ function avf_site_styles_get_stylesheet_version() {
 /**
  * Enqueues the public stylesheet if it has not been added yet.
  *
- * This helper is also called from shortcodes so the styles load inside the
- * Elementor preview iframe even though the generic frontend enqueue hook stays
- * disabled for editor requests.
+ * This helper can also be called from shortcodes. The generic frontend enqueue
+ * hook deliberately runs in Elementor's preview iframe as well, so that the
+ * editor reflects the public layout.
  *
  * @return void
  */
@@ -362,14 +394,14 @@ function avf_site_styles_enqueue_public_stylesheet() {
 }
 
 /**
- * Enqueues the site-fixes stylesheet on the public frontend only, at a
- * late priority so it prints after Elementor's and the theme's own
- * stylesheets (allowing it to safely override them where needed).
+ * Enqueues the site-fixes stylesheet on the public frontend and Elementor's
+ * preview iframe, at a late priority so it prints after Elementor's and the
+ * theme's own stylesheets (allowing it to safely override them where needed).
  *
  * @return void
  */
 function avf_site_styles_enqueue_assets() {
-	if ( avf_site_styles_is_backend_request() || avf_site_styles_is_elementor_editor_request() ) {
+	if ( avf_site_styles_is_backend_request() ) {
 		return;
 	}
 

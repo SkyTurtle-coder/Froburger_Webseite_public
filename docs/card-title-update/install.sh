@@ -11,7 +11,7 @@ files=(wp-content/plugins/avf-post-templates/assets/css/post-template-frontend.c
 cd "$app"
 test "$(wp option get home)" = 'https://www.avfroburger.ch'
 wp plugin is-active avf-post-templates
-printf '%s  %s\n' "$2" "$stage/new.tar.gz" "$3" "$stage/base.tar.gz" | sha256sum --check --status
+printf '%s  %s\n' "$2" "$stage/new.tar.gz" "$3" "$stage/base.tar.gz" | sha256sum -c
 mkdir -p "$stage/new" "$stage/base"
 tar -xzf "$stage/new.tar.gz" -C "$stage/new"
 tar -xzf "$stage/base.tar.gz" -C "$stage/base"

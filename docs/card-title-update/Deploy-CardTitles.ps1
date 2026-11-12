@@ -19,7 +19,7 @@ $installer = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'install.sh')).Repl
 $newHash = (Get-FileHash "$package/new.tar.gz" -Algorithm SHA256).Hash.ToLowerInvariant()
 $baseHash = (Get-FileHash "$package/base.tar.gz" -Algorithm SHA256).Hash.ToLowerInvariant()
 $installerHash = (Get-FileHash "$package/install.sh" -Algorithm SHA256).Hash.ToLowerInvariant()
-$remoteCommand = "printf '%s  %s\n' '$installerHash' '$remote/install.sh' | sha256sum --check --status && bash '$remote/install.sh' '$release' '$newHash' '$baseHash'"
+$remoteCommand = "printf '%s  %s\n' '$installerHash' '$remote/install.sh' | sha256sum -c && bash '$remote/install.sh' '$release' '$newHash' '$baseHash'"
 Write-Host "Paket aus Commit ${commit}: $package"
 if (-not ($Upload -or $Deploy)) {
     Write-Host 'Mit -Upload nur bereitstellen; mit -Deploy bereitstellen und produktiv installieren.'

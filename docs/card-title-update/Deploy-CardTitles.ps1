@@ -19,7 +19,8 @@ $installer = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'install.sh')).Repl
 $newHash = (Get-FileHash "$package/new.tar.gz" -Algorithm SHA256).Hash.ToLowerInvariant()
 $baseHash = (Get-FileHash "$package/base.tar.gz" -Algorithm SHA256).Hash.ToLowerInvariant()
 $installerHash = (Get-FileHash "$package/install.sh" -Algorithm SHA256).Hash.ToLowerInvariant()
-$remoteCommand = "printf '%s  %s\n' '$installerHash' '$remote/install.sh' | sha256sum -c && bash '$remote/install.sh' '$release' '$newHash' '$baseHash'"
+$remoteCommand = 'php -r ''exit(hash_file($argv[3], $argv[1]) === $argv[2] ? 0 : 1);'' ''{0}/install.sh'' ''{1}'' sha256 && bash ''{0}/install.sh'' ''{2}'' ''{3}'' ''{4}' -f $remote, $installerHash, $release, $newHash, $baseHash
+[IO.File]::WriteAllText((Join-Path $package 'launch-command.txt'), $remoteCommand, (New-Object System.Text.UTF8Encoding($false)))
 Write-Host "Paket aus Commit ${commit}: $package"
 if (-not ($Upload -or $Deploy)) {
     Write-Host 'Mit -Upload nur bereitstellen; mit -Deploy bereitstellen und produktiv installieren.'
@@ -27,7 +28,8 @@ if (-not ($Upload -or $Deploy)) {
 }
 Invoke-Checked ssh @('avfroburger-hostpoint', "umask 077; mkdir -p '$remote'")
 Invoke-Checked scp @("$package/new.tar.gz", "$package/base.tar.gz", "$package/install.sh", "avfroburger-hostpoint:$remote/")
-Write-Host "SSH-Startbefehl: ssh avfroburger-hostpoint `"$remoteCommand`""
+$displayCommand = $remoteCommand.Replace('$', '`$')
+Write-Host "SSH-Startbefehl: ssh avfroburger-hostpoint `"$displayCommand`""
 if ($Deploy) {
     Invoke-Checked ssh @('avfroburger-hostpoint', $remoteCommand)
 }

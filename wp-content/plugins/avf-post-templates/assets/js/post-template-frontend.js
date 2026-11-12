@@ -1,76 +1,6 @@
 ( function () {
 	'use strict';
 
-	var titleFitTimeout = null;
-	var TITLE_MAX_SIZE = 15.68; // 0.98rem at 16px root.
-	var TITLE_MIN_SIZE = 11.2; // 0.7rem safeguard.
-	var TITLE_STEP = 0.32; // 0.02rem.
-
-	function resetTitleStyles( title ) {
-		title.style.fontSize = TITLE_MAX_SIZE + 'px';
-		title.classList.remove( 'is-multiword' );
-	}
-
-	function fitSingleWordTitle( title ) {
-		var fontSize = TITLE_MAX_SIZE;
-
-		while ( title.scrollWidth > title.clientWidth && fontSize > TITLE_MIN_SIZE ) {
-			fontSize -= TITLE_STEP;
-			title.style.fontSize = fontSize + 'px';
-		}
-	}
-
-	function fitMultiWordTitle( title ) {
-		var fontSize = TITLE_MAX_SIZE;
-		var computedStyle = window.getComputedStyle( title );
-		var lineHeight = parseFloat( computedStyle.lineHeight ) || fontSize * 1.16;
-		var maxLines = parseInt( computedStyle.getPropertyValue( '--avf-card-title-max-lines' ), 10 ) || 2;
-		var maxHeight;
-
-		title.classList.add( 'is-multiword' );
-		maxHeight = lineHeight * maxLines;
-
-		while ( title.scrollHeight > maxHeight + 1 && fontSize > TITLE_MIN_SIZE ) {
-			fontSize -= TITLE_STEP;
-			title.style.fontSize = fontSize + 'px';
-			lineHeight = parseFloat( window.getComputedStyle( title ).lineHeight ) || fontSize * 1.16;
-			maxHeight = lineHeight * maxLines;
-		}
-	}
-
-	function fitRecommendationTitles( scope ) {
-		var root = scope || document;
-		var titles = root.querySelectorAll( '.avf-post-recommendations__card-title' );
-
-		titles.forEach( function ( title ) {
-			var text = title.textContent || '';
-			var hasMultipleWords = /\s+/.test( text.trim() );
-
-			if ( title.clientWidth <= 0 ) {
-				return;
-			}
-
-			resetTitleStyles( title );
-
-			if ( hasMultipleWords ) {
-				fitMultiWordTitle( title );
-				return;
-			}
-
-			fitSingleWordTitle( title );
-		} );
-	}
-
-	function scheduleTitleFit( scope ) {
-		if ( titleFitTimeout ) {
-			window.clearTimeout( titleFitTimeout );
-		}
-
-		titleFitTimeout = window.setTimeout( function () {
-			fitRecommendationTitles( scope );
-		}, 40 );
-	}
-
 	function updateArchiveState( archive, button, actions, status, visibleCount, totalCount ) {
 		var hasMore = visibleCount < totalCount;
 		var initialCount = parseInt( archive.getAttribute( 'data-initial-count' ), 10 ) || 0;
@@ -133,7 +63,6 @@
 		);
 
 		if ( ! button || items.length <= initialCount ) {
-			scheduleTitleFit( archive );
 			archive.setAttribute( 'data-avf-post-archive-ready', 'true' );
 			return;
 		}
@@ -181,10 +110,8 @@
 				}
 			}
 
-			scheduleTitleFit( archive );
 		} );
 
-		scheduleTitleFit( archive );
 		archive.setAttribute( 'data-avf-post-archive-ready', 'true' );
 	}
 
@@ -192,7 +119,6 @@
 		var archives = document.querySelectorAll( '[data-avf-post-archive]' );
 
 		archives.forEach( initPostArchive );
-		scheduleTitleFit( document );
 	}
 
 	if ( document.readyState === 'loading' ) {
@@ -201,7 +127,4 @@
 		init();
 	}
 
-	window.addEventListener( 'resize', function () {
-		scheduleTitleFit( document );
-	} );
 }() );

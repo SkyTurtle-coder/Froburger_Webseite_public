@@ -1,0 +1,66 @@
+.avf-post-template-editor__intro {
+	margin-top: 0;
+}
+
+.avf-post-template-editor__toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin: 0 0 1rem;
+	font-weight: 600;
+}
+
+.avf-post-template-editor__panel {
+	display: none;
+	padding: 1rem;
+	border: 1px solid #dcdcde;
+	background: #fff;
+}
+
+.avf-post-template-editor__panel.is-enabled {
+	display: block;
+}
+
+.avf-post-template-editor__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 0.75rem 1rem;
+	margin-bottom: 1rem;
+}
+
+.avf-post-template-editor__grid p {
+	margin: 0;
+}
+
+.avf-post-template-editor__wysiwyg {
+	margin-bottom: 1rem;
+}
+
+.avf-post-template-editor__gallery-actions {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin: 0.5rem 0 1rem;
+}
+
+.avf-post-template-editor__gallery-preview {
+	min-height: 2rem;
+}
+
+.avf-post-template-editor__gallery-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+	gap: 0.75rem;
+	max-width: 640px;
+}
+
+.avf-post-template-editor__gallery-item img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 0.5rem;
+}
+
+.avf-post-template-editor__gallery[data-layout="carousel"] .description {
+	color: #1d4ed8;
+}

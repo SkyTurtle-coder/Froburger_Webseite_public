@@ -67,3 +67,7 @@ wp-content/mu-plugins/local-by-flywheel-live-link-helper.php
 *headless*.png
 qa-*.png
 tmp-*.json
+
+# Editorial post cards and archive.
+!wp-content/plugins/avf-post-templates/
+!wp-content/plugins/avf-post-templates/**

@@ -151,8 +151,8 @@ class AVF_Events_List_Shortcode {
 	 */
 	private function render_empty( $type ) {
 		$message = self::TYPE_UPCOMING === $type
-			? __( 'Aktuell sind keine kommenden Veranstaltungen verÃ¶ffentlicht.', 'avf-events-integration' )
-			: __( 'Derzeit sind keine vergangenen Veranstaltungen verfÃ¼gbar.', 'avf-events-integration' );
+			? __( 'Aktuell sind keine kommenden Veranstaltungen veröffentlicht.', 'avf-events-integration' )
+			: __( 'Derzeit sind keine vergangenen Veranstaltungen verfügbar.', 'avf-events-integration' );
 
 		$this->enqueue_assets();
 
@@ -171,8 +171,8 @@ class AVF_Events_List_Shortcode {
 	 */
 	private function render_unavailable( $type ) {
 		$message = self::TYPE_UPCOMING === $type
-			? __( 'Aktuell sind keine kommenden Veranstaltungen verÃ¶ffentlicht.', 'avf-events-integration' )
-			: __( 'Derzeit sind keine vergangenen Veranstaltungen verfÃ¼gbar.', 'avf-events-integration' );
+			? __( 'Aktuell sind keine kommenden Veranstaltungen veröffentlicht.', 'avf-events-integration' )
+			: __( 'Derzeit sind keine vergangenen Veranstaltungen verfügbar.', 'avf-events-integration' );
 
 		$this->enqueue_assets();
 
@@ -181,7 +181,7 @@ class AVF_Events_List_Shortcode {
 		if ( current_user_can( 'manage_options' ) ) {
 			ob_start();
 			?>
-			<p class="avf-events-notice"><?php esc_html_e( 'Hinweis (nur fÃ¼r Administratoren sichtbar): Die Veranstaltungsdaten konnten momentan nicht geladen werden.', 'avf-events-integration' ); ?></p>
+			<p class="avf-events-notice"><?php esc_html_e( 'Hinweis (nur für Administratoren sichtbar): Die Veranstaltungsdaten konnten momentan nicht geladen werden.', 'avf-events-integration' ); ?></p>
 			<?php
 			$html .= ob_get_clean();
 		}
@@ -314,7 +314,7 @@ class AVF_Events_List_Shortcode {
 
 			<div class="avf-events-tile__content">
 				<?php if ( $view['is_multi_day'] ) : ?>
-					<span class="avf-events-tile__badge"><?php esc_html_e( 'MehrtÃ¤gig', 'avf-events-integration' ); ?></span>
+					<span class="avf-events-tile__badge"><?php esc_html_e( 'Mehrtägig', 'avf-events-integration' ); ?></span>
 				<?php endif; ?>
 
 				<h3 class="avf-events-tile__title"><?php echo esc_html( $view['title'] ); ?></h3>
@@ -327,7 +327,7 @@ class AVF_Events_List_Shortcode {
 					<?php
 					printf(
 						/* translators: 1: time (H:i), 2: location name */
-						esc_html__( '%1$s Â· %2$s', 'avf-events-integration' ),
+						esc_html__( '%1$s · %2$s', 'avf-events-integration' ),
 						esc_html( $view['time_label'] ),
 						esc_html( $view['location_name'] )
 					);
@@ -337,11 +337,11 @@ class AVF_Events_List_Shortcode {
 				<div class="avf-events-tile__actions">
 					<a class="avf-events-tile__link" href="<?php echo esc_url( $detail_url ); ?>">
 						<?php esc_html_e( 'Details', 'avf-events-integration' ); ?>
-						<span aria-hidden="true">â†’</span>
+						<span aria-hidden="true">→</span>
 					</a>
 					<?php if ( '' !== $ics_url ) : ?>
 						<a class="avf-events-tile__ics" href="<?php echo esc_url( $ics_url ); ?>">
-							<?php esc_html_e( 'Zum Kalender hinzufÃ¼gen', 'avf-events-integration' ); ?>
+							<?php esc_html_e( 'Zum Kalender hinzufügen', 'avf-events-integration' ); ?>
 						</a>
 					<?php endif; ?>
 				</div>

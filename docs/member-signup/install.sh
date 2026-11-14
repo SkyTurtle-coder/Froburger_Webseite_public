@@ -20,8 +20,9 @@ tar -xzf "$stage/new.tar.gz" -C "$stage/new"
 tar -xzf "$stage/base.tar.gz" -C "$stage/base"
 for file in "${files[@]}"; do
     if [[ "$file" = *.php ]]; then php -l "$stage/new/$file"; fi
-    # Preserve unrelated production edits: fail before writing if source differs.
-    php -r '$read = fn($p) => str_replace("\r\n", "\n", file_get_contents($p)); $current=$read($argv[1]); if ($current !== $read($argv[2]) && $current !== $read($argv[3])) { fwrite(STDERR, "Serverdatei weicht ab: ".$argv[1].". Nichts installiert.\n"); exit(1); }' "$file" "$stage/base/$file" "$stage/new/$file"
+    # Exact reviewed production variant: older integer coercion in the signup handler.
+    # All other file changes still stop deployment before writing.
+    php -r '$read = fn($p) => str_replace("\r\n", "\n", file_get_contents($p)); $current=$read($argv[1]); $reviewed = $argv[1] === "wp-content/plugins/avf-events-integration/includes/class-avf-event-signup-handler.php" && hash("sha256", $current) === "9c92713eb94fc65cf4834887e3bcfafa64c01dcb993bc6f91bfc40b38427bf66"; if (!$reviewed && $current !== $read($argv[2]) && $current !== $read($argv[3])) { fwrite(STDERR, "Serverdatei weicht ab: ".$argv[1].". Nichts installiert.\n"); exit(1); }' "$file" "$stage/base/$file" "$stage/new/$file"
 done
 if wp maintenance-mode is-active >/dev/null 2>&1; then
     printf 'WordPress ist bereits im Wartungsmodus. Abbruch.\n' >&2

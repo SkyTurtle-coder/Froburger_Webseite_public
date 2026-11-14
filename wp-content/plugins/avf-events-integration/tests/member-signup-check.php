@@ -25,11 +25,11 @@ $raw = $source + array(
     'status' => 'OFF', 'is_internal' => true, 'signup_policy' => 'members_v1',
     'description' => '', 'date' => '2026-10-01', 'start_time' => '20:00', 'location' => 'Basel',
     'signup_enabled' => true, 'signup_open' => true, 'signup_columns' => array(),
-    'signups' => array( array( 'vulgo' => 'Must stay private', 'attending' => true, 'values' => array() ) ),
+    'signups' => array( array( 'vulgo' => 'Public participant', 'attending' => true, 'values' => array() ) ),
 );
 $GLOBALS['response'] = array( 'status' => 200, 'body' => $raw );
 $client = new AVF_Events_API_Client();
-same( array(), $client->get_event_detail( 'test' )['signups'] );
+same( 1, count( $client->get_event_detail( 'test' )['signups'] ) );
 $GLOBALS['response']['body']['is_internal'] = false;
 same( 1, count( $client->get_event_detail( 'test' )['signups'] ) );
 $GLOBALS['response']['body']['is_internal'] = true;
@@ -47,4 +47,4 @@ same( false, false !== strpos( $GLOBALS['sent']['body'], '192.0.2.5' ) );
 $handler = ( new ReflectionClass( AVF_Event_Signup_Handler::class ) )->newInstanceWithoutConstructor();
 $map = new ReflectionMethod( $handler, 'map_signup_error_message' );
 same( 'Sorry, nur für Froburger.', $map->invoke( $handler, new WP_Error( 'denied', 'private reason', array( 'api_code' => 'member_signup_denied' ) ) ) );
-echo "Member checks passed: private data, normal events, old backend, outage, signed visitor key, generic error.\n";
+echo "Member checks passed: public participants, normal events, old backend, outage, signed visitor key, generic error.\n";

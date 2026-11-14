@@ -115,7 +115,6 @@ class AVF_Events_API_Client {
 			if ( ! isset( $data['signup_policy'] ) || 'members_v1' !== $data['signup_policy'] ) {
 				return new WP_Error( 'avf_events_policy_unavailable', 'Member signup policy unavailable.' );
 			}
-			$event['signups'] = array();
 		}
 
 		return $event;

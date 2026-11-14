@@ -118,7 +118,6 @@ class AVF_Event_Detail_Shortcode {
 	 * @return string
 	 */
 	private function render_html( array $event, $notice ) {
-		$internal = ! empty( $event['is_internal'] ) || 'INTERN' === strtoupper( $event['status'] );
 		$deadline_text       = $this->format_deadline( $event['signup_deadline'] );
 		$deadline_relative   = $this->format_deadline_relative( $event['signup_deadline'] );
 		$public_columns      = array_values( array_filter( $event['signup_columns'], array( $this, 'is_public_column' ) ) );
@@ -227,8 +226,7 @@ class AVF_Event_Detail_Shortcode {
 					<p><?php echo esc_html( $this->get_signup_intro_text( $event ) ); ?></p>
 				</div>
 
-				<div class="avf-event-detail__signup-grid<?php echo $internal ? ' avf-event-detail__signup-grid--internal' : ''; ?>">
-					<?php if ( ! $internal ) : ?>
+				<div class="avf-event-detail__signup-grid">
 					<section class="avf-event-detail__table-block" aria-labelledby="avf-public-signups-heading">
 						<h3 id="avf-public-signups-heading">
 							<?php
@@ -242,7 +240,6 @@ class AVF_Event_Detail_Shortcode {
 						<?php echo $this->render_public_signups_table( $event['signups'], $public_columns ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</section>
 
-					<?php endif; ?>
 					<section class="avf-event-detail__form-block" aria-labelledby="avf-public-signup-form-heading">
 						<h3 id="avf-public-signup-form-heading"><?php esc_html_e( 'Anmelden', 'avf-events-integration' ); ?></h3>
 						<?php

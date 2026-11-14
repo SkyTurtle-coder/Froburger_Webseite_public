@@ -900,10 +900,6 @@
 	color: var(--avf-text-muted, #657067);
 }
 
-.avf-event-detail__signup-grid.avf-event-detail__signup-grid--internal {
-	grid-template-columns: minmax(0, 1fr);
-}
-
 .avf-event-detail__signup-grid {
 	display: grid;
 	grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);

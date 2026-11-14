@@ -160,6 +160,13 @@
 	color: var(--avf-green-dark, #183f1e);
 }
 
+/* Internal events stand out without changing the other status badges. */
+.avf-events-tile__status--intern {
+	background-color: #b42318;
+	border-color: #b42318;
+	color: #fff;
+}
+
 .avf-events-tile__content {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(180px, 220px) auto;

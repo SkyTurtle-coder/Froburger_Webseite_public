@@ -6,12 +6,12 @@ function Invoke-Checked {
     if ($LASTEXITCODE -ne 0) { throw "$Exe fehlgeschlagen (Exit $LASTEXITCODE)." }
 }
 $repo = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$commit = '5ee55abc0166b3a1126aca3ff90a9ed089d4aaf1'
+$commit = '66dec21c64425611920fd40021ead373c3029106'
 $release = 'avf-event-badges-' + (Get-Date -Format 'yyyyMMdd-HHmmss')
 $package = Join-Path $env:TEMP $release
 $remote = "/home/avfrobur/deploy-tmp/$release"
 New-Item -ItemType Directory -Path $package | Out-Null
-$files = @('wp-content/plugins/avf-events-integration/includes/class-avf-events-api-client.php', 'wp-content/plugins/avf-events-integration/includes/class-avf-events-view-helpers.php', 'wp-content/plugins/avf-events-integration/includes/class-avf-events-list-shortcode.php')
+$files = @('wp-content/plugins/avf-events-integration/assets/css/events-lists.css', 'wp-content/plugins/avf-events-integration/includes/class-avf-events-api-client.php', 'wp-content/plugins/avf-events-integration/includes/class-avf-events-view-helpers.php', 'wp-content/plugins/avf-events-integration/includes/class-avf-events-list-shortcode.php')
 Invoke-Checked git (@('-C', $repo, '-c', 'core.autocrlf=false', 'archive', '--format=tar.gz', "--output=$package/new.tar.gz", $commit, '--') + $files)
 Invoke-Checked git (@('-C', $repo, '-c', 'core.autocrlf=false', 'archive', '--format=tar.gz', "--output=$package/base.tar.gz", 'bb5e46d^', '--') + $files)
 $installer = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'install.sh')).Replace("`r`n", "`n")

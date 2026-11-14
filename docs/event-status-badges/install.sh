@@ -7,7 +7,7 @@ release="${1:?Release fehlt}"
 app=/home/avfrobur/www/gamma.avfroburger.ch
 stage=/home/avfrobur/deploy-tmp/$release
 backup=/home/avfrobur/backups/$release
-files=(wp-content/plugins/avf-events-integration/includes/class-avf-events-api-client.php wp-content/plugins/avf-events-integration/includes/class-avf-events-view-helpers.php wp-content/plugins/avf-events-integration/includes/class-avf-events-list-shortcode.php)
+files=(wp-content/plugins/avf-events-integration/assets/css/events-lists.css wp-content/plugins/avf-events-integration/includes/class-avf-events-api-client.php wp-content/plugins/avf-events-integration/includes/class-avf-events-view-helpers.php wp-content/plugins/avf-events-integration/includes/class-avf-events-list-shortcode.php)
 cd "$app"
 test "$(wp option get home)" = 'https://www.avfroburger.ch'
 wp plugin is-active avf-events-integration
@@ -17,7 +17,7 @@ mkdir -p "$stage/new" "$stage/base"
 tar -xzf "$stage/new.tar.gz" -C "$stage/new"
 tar -xzf "$stage/base.tar.gz" -C "$stage/base"
 for file in "${files[@]}"; do
-    php -l "$stage/new/$file"
+    if [[ "$file" = *.php ]]; then php -l "$stage/new/$file"; fi
     # Preserve unrelated production edits: fail before writing if source differs.
     php -r '$read = fn($p) => str_replace("\r\n", "\n", file_get_contents($p)); $current=$read($argv[1]); if ($current !== $read($argv[2]) && $current !== $read($argv[3])) { fwrite(STDERR, "Serverdatei weicht ab: ".$argv[1].". Nichts installiert.\n"); exit(1); }' "$file" "$stage/base/$file" "$stage/new/$file"
 done

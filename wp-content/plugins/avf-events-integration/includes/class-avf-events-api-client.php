@@ -623,6 +623,7 @@ class AVF_Events_API_Client {
 			'short_description' => (string) $item['short_description'],
 			'status'            => ( isset( $item['status'] ) && is_scalar( $item['status'] ) ) ? sanitize_key( (string) $item['status'] ) : '',
 			'status_label'      => ( isset( $item['status_label'] ) && is_scalar( $item['status_label'] ) ) ? sanitize_text_field( (string) $item['status_label'] ) : '',
+			'is_internal'      => isset( $item['is_internal'] ) ? in_array( $item['is_internal'], array( true, 1, '1', 'true' ), true ) : null,
 			'start_at'          => (string) $item['start_at'],
 			'start_timing'      => isset( $item['start_timing'] ) && in_array( $item['start_timing'], array( 'st', 'ct' ), true ) ? $item['start_timing'] : '',
 			'end_at'            => (string) $item['end_at'],

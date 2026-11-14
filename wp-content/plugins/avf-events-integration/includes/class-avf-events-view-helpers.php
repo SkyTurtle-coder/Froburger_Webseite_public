@@ -14,6 +14,27 @@ defined( 'ABSPATH' ) || exit;
 
 class AVF_Events_View_Helpers {
 
+	/** Separate primary status and internal marker; tolerate older cached payloads. */
+	public static function status_badges( array $event ) {
+		$status = isset( $event['status'] ) ? strtolower( (string) $event['status'] ) : '';
+		$labels = array( 'off' => 'Off', 'inoff' => 'Inoff', 'iaoff' => 'Iaoff', 'hochoff' => 'Hochoff' );
+		$badges = array();
+		if ( isset( $labels[ $status ] ) ) {
+			$badges[] = array( 'status' => $status, 'label' => $labels[ $status ] );
+		}
+		$internal = 'intern' === $status;
+		if ( isset( $event['is_internal'] ) ) {
+			$internal = $internal || in_array( $event['is_internal'], array( true, 1, '1', 'true' ), true );
+		} elseif ( isset( $event['status_label'] ) ) {
+			// Older WordPress transients do not yet contain is_internal.
+			$internal = $internal || 1 === preg_match( '/(?:^|\+)\s*Intern\s*$/i', $event['status_label'] );
+		}
+		if ( $internal ) {
+			$badges[] = array( 'status' => 'intern', 'label' => 'Intern' );
+		}
+		return $badges;
+	}
+
 	/** Returns only an explicitly supplied, supported time suffix. */
 	public static function timing_suffix( array $event ) {
 		$labels = array( 'st' => ' s.t.', 'ct' => ' c.t.' );
@@ -131,6 +152,7 @@ class AVF_Events_View_Helpers {
 			'short_description' => $event['short_description'],
 			'status'            => $event['status'],
 			'status_label'      => $event['status_label'],
+			'status_badges'     => self::status_badges( $event ),
 			'location_name'     => $event['location_name'],
 			'detail_path'       => $event['detail_path'],
 			'source_url'        => $event['source_url'],

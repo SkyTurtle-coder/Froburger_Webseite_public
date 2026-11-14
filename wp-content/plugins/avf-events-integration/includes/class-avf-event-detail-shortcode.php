@@ -43,6 +43,12 @@ class AVF_Event_Detail_Shortcode {
 	 * @return string
 	 */
 	public function render( $atts ) {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+		if ( ! headers_sent() ) {
+			nocache_headers();
+		}
 		$atts = shortcode_atts( array( 'slug' => '' ), $atts, 'avf_event_detail' );
 		$slug = $this->resolve_slug( $atts );
 
@@ -112,6 +118,7 @@ class AVF_Event_Detail_Shortcode {
 	 * @return string
 	 */
 	private function render_html( array $event, $notice ) {
+		$internal = ! empty( $event['is_internal'] ) || 'INTERN' === strtoupper( $event['status'] );
 		$deadline_text       = $this->format_deadline( $event['signup_deadline'] );
 		$deadline_relative   = $this->format_deadline_relative( $event['signup_deadline'] );
 		$public_columns      = array_values( array_filter( $event['signup_columns'], array( $this, 'is_public_column' ) ) );
@@ -220,7 +227,8 @@ class AVF_Event_Detail_Shortcode {
 					<p><?php echo esc_html( $this->get_signup_intro_text( $event ) ); ?></p>
 				</div>
 
-				<div class="avf-event-detail__signup-grid">
+				<div class="avf-event-detail__signup-grid<?php echo $internal ? ' avf-event-detail__signup-grid--internal' : ''; ?>">
+					<?php if ( ! $internal ) : ?>
 					<section class="avf-event-detail__table-block" aria-labelledby="avf-public-signups-heading">
 						<h3 id="avf-public-signups-heading">
 							<?php
@@ -234,6 +242,7 @@ class AVF_Event_Detail_Shortcode {
 						<?php echo $this->render_public_signups_table( $event['signups'], $public_columns ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</section>
 
+					<?php endif; ?>
 					<section class="avf-event-detail__form-block" aria-labelledby="avf-public-signup-form-heading">
 						<h3 id="avf-public-signup-form-heading"><?php esc_html_e( 'Anmelden', 'avf-events-integration' ); ?></h3>
 						<?php
@@ -763,6 +772,9 @@ class AVF_Event_Detail_Shortcode {
 		}
 
 		if ( $event['signup_open'] ) {
+			if ( ! empty( $event['is_internal'] ) || 'INTERN' === strtoupper( $event['status'] ) ) {
+				return __( 'Für Aktive und Altfroburger.', 'avf-events-integration' );
+			}
 			return __( 'Trag dich ein und prüfe direkt, wer bereits zugesagt hat.', 'avf-events-integration' );
 		}
 

@@ -42,10 +42,20 @@ class AVF_Event_Detail_Router {
 	 */
 	private function __construct() {
 		add_action( 'init', array( __CLASS__, 'register_rewrite' ) );
+		add_action( 'template_redirect', array( $this, 'prevent_detail_caching' ), 0 );
 		add_filter( 'query_vars', array( $this, 'register_query_var' ) );
 		add_filter( 'redirect_canonical', array( $this, 'preserve_detail_urls' ), 10, 2 );
 		add_filter( 'get_canonical_url', array( $this, 'filter_canonical_url' ), 10, 2 );
 		add_filter( 'body_class', array( $this, 'add_detail_body_class' ) );
+	}
+
+	public function prevent_detail_caching() {
+		if ( get_query_var( self::QUERY_VAR ) || is_page( trim( AVF_Events_View_Helpers::get_detail_page_path(), '/' ) ) ) {
+			if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+				define( 'DONOTCACHEPAGE', true );
+			}
+			nocache_headers();
+		}
 	}
 
 	/**

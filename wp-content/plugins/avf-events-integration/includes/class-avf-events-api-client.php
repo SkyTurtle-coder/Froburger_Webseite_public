@@ -97,22 +97,11 @@ class AVF_Events_API_Client {
 			return new WP_Error( 'avf_events_invalid_slug', 'Invalid event slug.' );
 		}
 
-		$cache_key    = $this->build_v1_cache_key( 'detail', $slug, 0 );
-		$fallback_key = $cache_key . '_fallback';
-
-		$fresh = get_transient( $cache_key );
-		if ( false !== $fresh && is_array( $fresh ) ) {
-			return $fresh;
-		}
-
+		// A changed internal flag must take effect immediately. Never serve a
+		// cached participant list, including stale fallback data during outages.
 		$data = $this->request_json( 'GET', '/api/v1/public/events/' . rawurlencode( $slug ) . '/', 8 );
 
 		if ( is_wp_error( $data ) ) {
-			$fallback = get_transient( $fallback_key );
-			if ( false !== $fallback && is_array( $fallback ) ) {
-				return $fallback;
-			}
-
 			return $data;
 		}
 
@@ -122,9 +111,12 @@ class AVF_Events_API_Client {
 			return new WP_Error( 'avf_events_invalid_detail', 'The event detail response was invalid.' );
 		}
 
-		$ttl = $this->get_cache_ttl();
-		$this->set_cached( $cache_key, $event, $ttl );
-		$this->set_cached( $fallback_key, $event, self::FALLBACK_MAX_AGE );
+		if ( ! empty( $event['is_internal'] ) || 'INTERN' === strtoupper( $event['status'] ) ) {
+			if ( ! isset( $data['signup_policy'] ) || 'members_v1' !== $data['signup_policy'] ) {
+				return new WP_Error( 'avf_events_policy_unavailable', 'Member signup policy unavailable.' );
+			}
+			$event['signups'] = array();
+		}
 
 		return $event;
 	}
@@ -146,6 +138,9 @@ class AVF_Events_API_Client {
 			$payload['values'] = new stdClass();
 		}
 
+		// Never accept a visitor-supplied key or forwarded-IP header. This key
+		// is covered by the server signature and stores no raw address in Django.
+		$payload['client_key'] = hash_hmac( 'sha256', isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown', $this->get_signup_secret() );
 		$body = wp_json_encode( $payload );
 
 		$headers = array(

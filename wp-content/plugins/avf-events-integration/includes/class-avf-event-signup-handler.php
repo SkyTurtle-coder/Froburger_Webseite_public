@@ -359,6 +359,8 @@ class AVF_Event_Signup_Handler {
 		$api_code = ( is_array( $data ) && ! empty( $data['api_code'] ) ) ? (string) $data['api_code'] : '';
 
 		switch ( $api_code ) {
+			case 'member_signup_denied':
+				return __( 'Sorry, nur für Froburger.', 'avf-events-integration' );
 			case 'invalid_pin':
 			case 'invalid_credentials':
 			case 'pin_locked':

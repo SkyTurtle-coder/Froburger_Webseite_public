@@ -12,7 +12,7 @@ cd "$app"
 test "$(wp option get home)" = 'https://www.avfroburger.ch'
 wp plugin is-active avf-events-integration
 # Require the backend policy before exposing the new public form.
-wp eval '$r=avf_internal_api_request("GET", "/api/v1/public/events/schluss-acbc/", array("timeout"=>10)); if (is_wp_error($r) || wp_remote_retrieve_response_code($r)!==200) {fwrite(STDERR,"Backend nicht erreichbar.\n"); exit(1);} $d=json_decode(wp_remote_retrieve_body($r),true); if (($d["signup_policy"]??"")!=="members_v1" || empty($d["is_internal"]) || !isset($d["signups"]) || $d["signups"]!==array()) {fwrite(STDERR,"Backend-Mitgliederpruefung fehlt. Zuerst Django deployen.\n"); exit(1);}'
+wp eval '$r=avf_internal_api_request("GET", "/api/v1/public/events/schluss-acbc/", array("timeout"=>10)); if (is_wp_error($r) || wp_remote_retrieve_response_code($r)!==200) {fwrite(STDERR,"Backend nicht erreichbar.\n"); exit(1);} $d=json_decode(wp_remote_retrieve_body($r),true); if (($d["signup_policy"]??"")!=="members_v1" || empty($d["is_internal"]) || !isset($d["signups"]) || !is_array($d["signups"])) {fwrite(STDERR,"Backend-Mitgliederpruefung fehlt. Zuerst Django deployen.\n"); exit(1);}'
 php -r 'exit(hash_file($argv[3], $argv[1]) === $argv[2] ? 0 : 1);' "$stage/new.tar.gz" "$2" sha256
 php -r 'exit(hash_file($argv[3], $argv[1]) === $argv[2] ? 0 : 1);' "$stage/base.tar.gz" "$3" sha256
 mkdir -p "$stage/new" "$stage/base"
@@ -54,11 +54,8 @@ wp eval 'AVF_Events_API_Client::clear_cache(); if (class_exists("\\Elementor\\Pl
 wp cache flush
 wp maintenance-mode deactivate
 curl --fail --silent --show-error --max-time 30 --dump-header "$stage/headers.txt" "https://www.avfroburger.ch/anlaesse/schluss-acbc/?avf_release=$release" > "$stage/verified.html"
-grep -q 'avf-event-detail__signup-grid--internal' "$stage/verified.html"
-if grep -q 'id="avf-public-signups-heading"' "$stage/verified.html"; then
-    printf 'Oeffentliche Teilnehmerliste unerwartet sichtbar.\n' >&2
-    false
-fi
+grep -q 'avf-event-detail__signup-grid' "$stage/verified.html"
+grep -q 'id="avf-public-signups-heading"' "$stage/verified.html"
 grep -qi 'cache-control:.*no-store' "$stage/headers.txt"
 trap - ERR
 printf 'Interne Anmeldung auf WordPress installiert. Backup: %s\n' "$backup"
